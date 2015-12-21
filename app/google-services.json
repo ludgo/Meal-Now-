@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "restcourse",
+    "project_number": "795391263035",
+    "name": "restcourse"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795391263035:android:cad02134b71f86ce",
+        "client_id": "android:com.ludgo.android.mealnow",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.ludgo.android.mealnow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795391263035-pfve7jojm3ppuc36u81h4vv952bgga80.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ludgo.android.mealnow",
+            "certificate_hash": "CAD3AB07C9EB333D842EC625984661C86A16CC5F"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
