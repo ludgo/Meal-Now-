@@ -2,6 +2,7 @@ package com.ludgo.android.mealnow;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +19,18 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.ludgo.android.mealnow.util.Constants;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
@@ -29,11 +42,12 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
-    private static final String TAG = "SignInActivity";
+    private static final String LOG_TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
+    private TextView mIdTokenTextView;
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -43,19 +57,20 @@ public class MainActivity extends AppCompatActivity implements
 
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
+        mIdTokenTextView = (TextView) findViewById(R.id.token);
 
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
 
-        // [START configure_signin]
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        // Request only the user's ID token, which can be used to identify the
+        // user securely to your backend. This will contain the user's basic
+        // profile (name, profile picture URL, etc) so you should not need to
+        // make an additional call to personalize your application.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
+                .requestIdToken(BuildConfig.SERVER_CLIENT_ID)
                 .build();
-        // [END configure_signin]
 
         // [START build_client]
         // Build a GoogleApiClient with access to the Google Sign-In API and the
@@ -88,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements
         if (opr.isDone()) {
             // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
             // and the GoogleSignInResult will be available instantly.
-            Log.d(TAG, "Got cached sign-in");
+            Log.d(LOG_TAG, "Got cached sign-in");
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
         } else {
@@ -114,6 +129,18 @@ public class MainActivity extends AppCompatActivity implements
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount acct = result.getSignInAccount();
+                String idToken = acct.getIdToken();
+                mIdTokenTextView.setText("ID Token: " + idToken);
+
+                // Send token to server and validate server-side
+                GoogleTokenAsyncTask task = new GoogleTokenAsyncTask();
+                task.execute(idToken);
+
+            } else {
+                mIdTokenTextView.setText("ID Token: null");
+            }
             handleSignInResult(result);
         }
     }
@@ -121,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements
 
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        Log.d(LOG_TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -173,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
+        Log.d(LOG_TAG, "onConnectionFailed:" + connectionResult);
     }
 
     private void showProgressDialog() {
@@ -216,6 +243,54 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.disconnect_button:
                 revokeAccess();
                 break;
+        }
+    }
+
+    private class GoogleTokenAsyncTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String idToken = params[0];
+
+            try {
+                URL url = new URL(Constants.SERVER_BASE_URL + "/api/v1/google/login");
+
+                JSONObject object = new JSONObject();
+                object.put("client_type", "android");
+                object.put("token_id", idToken);
+
+                final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                OkHttpClient client = new OkHttpClient();
+
+                RequestBody body = RequestBody.create(JSON, object.toString());
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .build();
+                Log.d(LOG_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
+
+                Response response = client.newCall(request).execute();
+                Log.d(LOG_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
+                return response.body().string();
+        }
+            catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+                return null;
+            }
+            catch (IOException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String response) {
+            if (response == null) {
+                Log.e(LOG_TAG, "Error sending ID token to backend.");
+            } else {
+                Log.d(LOG_TAG, response);
+            }
         }
     }
 }
