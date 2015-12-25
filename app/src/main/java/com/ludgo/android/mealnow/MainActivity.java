@@ -2,7 +2,7 @@ package com.ludgo.android.mealnow;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,6 +20,7 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.ludgo.android.mealnow.util.Constants;
+import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements
         // profile (name, profile picture URL, etc) so you should not need to
         // make an additional call to personalize your application.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestProfile()
                 .requestIdToken(BuildConfig.SERVER_CLIENT_ID)
                 .build();
 
@@ -134,9 +137,7 @@ public class MainActivity extends AppCompatActivity implements
                 String idToken = acct.getIdToken();
                 mIdTokenTextView.setText("ID Token: " + idToken);
 
-                // Send token to server and validate server-side
-                GoogleTokenAsyncTask task = new GoogleTokenAsyncTask();
-                task.execute(idToken);
+                serverAuth(acct);
 
             } else {
                 mIdTokenTextView.setText("ID Token: null");
@@ -246,51 +247,53 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private class GoogleTokenAsyncTask extends AsyncTask<String, Void, String> {
+    private void serverAuth(GoogleSignInAccount acct) {
 
-        @Override
-        protected String doInBackground(String... params) {
+        try {
+            URL url = new URL(Constants.API_V1_URL + "/google/login");
 
-            String idToken = params[0];
+            JSONObject object = new JSONObject();
+            object.put("client_type", "android");
+            object.put("user_name", acct.getDisplayName());
+            object.put("user_email", acct.getEmail());
+            Uri personPhoto = acct.getPhotoUrl();
+            object.put("user_picture", (personPhoto == null) ? "" : personPhoto.toString());
+            object.put("token_id", acct.getIdToken());
 
-            try {
-                URL url = new URL(Constants.SERVER_BASE_URL + "/api/v1/google/login");
+            final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+            OkHttpClient client = new OkHttpClient();
 
-                JSONObject object = new JSONObject();
-                object.put("client_type", "android");
-                object.put("token_id", idToken);
+            RequestBody body = RequestBody.create(JSON, object.toString());
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
 
-                final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-                OkHttpClient client = new OkHttpClient();
+            Log.d(LOG_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    Log.e(LOG_TAG, "onFailure");
+                }
 
-                RequestBody body = RequestBody.create(JSON, object.toString());
-                Request request = new Request.Builder()
-                        .url(url)
-                        .post(body)
-                        .build();
-                Log.d(LOG_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
-
-                Response response = client.newCall(request).execute();
-                Log.d(LOG_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
-                return response.body().string();
-        }
-            catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-                return null;
-            }
-            catch (IOException e) {
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if (response == null) {
-                Log.e(LOG_TAG, "Error sending ID token to backend.");
-            } else {
-                Log.d(LOG_TAG, response);
-            }
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    try {
+                        if (response.isSuccessful()) {
+                            Log.d(LOG_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
+                            Log.d(LOG_TAG, response.body().string());
+                        }
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "onResponse");
+                    }
+                }
+            });
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
+            Log.e(LOG_TAG, "Error sending ID token to backend.");
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error sending ID token to backend.");
         }
     }
 }

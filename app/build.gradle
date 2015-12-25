@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.ludgo.android.mealnow"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -19,6 +19,7 @@ android {
     }
     buildTypes.each {
         it.buildConfigField 'String', 'SERVER_CLIENT_ID', MyServerClientId
+        it.buildConfigField 'String', 'SERVER_BASE_URL', MyServerBaseUrl
     }
 }
 
@@ -26,7 +27,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
-    compile 'com.squareup.okhttp:okhttp:2.7.0'
+    compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'com.squareup.okio:okio:1.6.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
