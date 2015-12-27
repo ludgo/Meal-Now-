@@ -51,10 +51,16 @@ public class MainActivity extends AppCompatActivity implements
     private TextView mIdTokenTextView;
     private ProgressDialog mProgressDialog;
 
+    private String mUserId;
+    private String mUserName;
+    private String mUserEmail;
+    private String mUserPicture;
+    private String mServerToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_signin);
 
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
@@ -70,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements
         // profile (name, profile picture URL, etc) so you should not need to
         // make an additional call to personalize your application.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestId()
                 .requestEmail()
                 .requestProfile()
                 .requestIdToken(BuildConfig.SERVER_CLIENT_ID)
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements
                 String idToken = acct.getIdToken();
                 mIdTokenTextView.setText("ID Token: " + idToken);
 
-                serverAuth(acct);
+                serverLogin(acct);
 
             } else {
                 mIdTokenTextView.setText("ID Token: null");
@@ -178,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements
                         // [START_EXCLUDE]
                         updateUI(false);
                         // [END_EXCLUDE]
+                        serverLogout();
                     }
                 });
     }
@@ -192,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements
                         // [START_EXCLUDE]
                         updateUI(false);
                         // [END_EXCLUDE]
+                        serverLogout();
                     }
                 });
     }
@@ -247,18 +256,23 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void serverAuth(GoogleSignInAccount acct) {
+    private void serverLogin(GoogleSignInAccount acct) {
 
         try {
-            URL url = new URL(Constants.API_V1_URL + "/google/login");
+            mUserId = acct.getId();
+            mUserName = acct.getDisplayName();
+            mUserEmail = acct.getEmail();
+            Uri personPhoto = acct.getPhotoUrl();
+            mUserPicture = (personPhoto == null) ? "default" : personPhoto.toString();
+
+            URL url = new URL(Constants.API_V1_LOGIN_GOOGLE);
 
             JSONObject object = new JSONObject();
             object.put("client_type", "android");
-            object.put("user_name", acct.getDisplayName());
-            object.put("user_email", acct.getEmail());
-            Uri personPhoto = acct.getPhotoUrl();
-            object.put("user_picture", (personPhoto == null) ? "" : personPhoto.toString());
-            object.put("token_id", acct.getIdToken());
+            object.put("user_name", mUserName);
+            object.put("user_email", mUserEmail);
+            object.put("user_picture", mUserPicture);
+            object.put("token_id", acct.getIdToken()); // this token is Google id token
 
             final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
             OkHttpClient client = new OkHttpClient();
@@ -269,31 +283,81 @@ public class MainActivity extends AppCompatActivity implements
                     .post(body)
                     .build();
 
-            Log.d(LOG_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
+            Log.d(Constants.OKHTTP_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    Log.e(LOG_TAG, "onFailure");
+                    Log.e(Constants.OKHTTP_TAG, "Server not responding to login request.");
                 }
 
                 @Override
                 public void onResponse(Response response) throws IOException {
                     try {
-                        if (response.isSuccessful()) {
-                            Log.d(LOG_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
-                            Log.d(LOG_TAG, response.body().string());
+                        Log.d(Constants.OKHTTP_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
+                        if (response.code() == 200 || response.code() == 201) {
+                            JSONObject object = new JSONObject(response.body().string());
+                            mServerToken = object.getString("token"); // this token is server token
+                            Log.d("!!!!!!!", mServerToken);
                         }
+                    } catch (JSONException e) {
+                        Log.e(LOG_TAG, "Error encoding server login response.");
+                        Log.e(LOG_TAG, e.getMessage(), e);
+                        e.printStackTrace();
                     } catch (IOException e) {
-                        Log.e(LOG_TAG, "onResponse");
+                        Log.e(Constants.OKHTTP_TAG, "Error encoding server login response.");
                     }
                 }
             });
         } catch (JSONException e) {
+            Log.e(LOG_TAG, "Error sending login request to server.");
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
-            Log.e(LOG_TAG, "Error sending ID token to backend.");
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error sending ID token to backend.");
+            Log.e(LOG_TAG, "Error sending login request to server.");
+        }
+    }
+
+    private void serverLogout() {
+
+        try {
+            URL url = new URL(Constants.API_V1_LOGOUT_GOOGLE);
+
+            JSONObject object = new JSONObject();
+            object.put("client_type", "android");
+            object.put("user_id", mUserId);
+            object.put("user_token", mServerToken); // this token is server token
+
+            final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+            OkHttpClient client = new OkHttpClient();
+
+            RequestBody body = RequestBody.create(JSON, object.toString());
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Log.d(Constants.OKHTTP_TAG, Constants.OKHTTP_REQUEST_TAG + request.toString());
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    Log.e(Constants.OKHTTP_TAG, "Server not responding to logout request.");
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    Log.d(Constants.OKHTTP_TAG, Constants.OKHTTP_RESPONSE_TAG + response.toString());
+                    if (response.code() == 200) {
+                        mServerToken = null;
+                        Log.d("!!!!!!!", "null");
+                    }
+                }
+            });
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Error sending logout request to server.");
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error sending logout request to server.");
         }
     }
 }
