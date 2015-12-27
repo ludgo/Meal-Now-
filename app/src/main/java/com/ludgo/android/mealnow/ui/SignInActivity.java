@@ -1,4 +1,4 @@
-package com.ludgo.android.mealnow;
+package com.ludgo.android.mealnow.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -19,6 +19,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.ludgo.android.mealnow.BuildConfig;
+import com.ludgo.android.mealnow.R;
 import com.ludgo.android.mealnow.util.Constants;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.MediaType;
@@ -39,7 +41,7 @@ import java.net.URL;
  *
  * https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java
  */
-public class MainActivity extends AppCompatActivity implements
+public class SignInActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
