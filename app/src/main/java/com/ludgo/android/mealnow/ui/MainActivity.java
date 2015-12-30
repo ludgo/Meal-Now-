@@ -49,13 +49,13 @@ public class MainActivity extends AppCompatActivity {
 
             switch (position) {
                 case 0:
-                    fragment = PublicTabFragment.newInstance("arg1", "arg2");
+                    fragment = new PublicTabFragment();
                     break;
                 case 1:
                     fragment = MeTabFragment.newInstance();
                     break;
                 default:
-                    fragment = PublicTabFragment.newInstance("arg1", "arg2");
+                    fragment = new PublicTabFragment();
                     break;
             }
 

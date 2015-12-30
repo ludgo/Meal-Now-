@@ -4,6 +4,9 @@
     <string name="tab_public">PUBLIC</string>
     <string name="tab_me">ME</string>
 
+    <string name="near_text">Near:</string>
+    <string name="offer_text">\"Let\'s meet and eat %1$s\"</string>
+
     <!-- Sign-in status messages -->
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_out">Signed out</string>
