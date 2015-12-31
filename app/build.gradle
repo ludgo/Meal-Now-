@@ -10,6 +10,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -21,6 +22,11 @@ android {
         it.buildConfigField 'String', 'SERVER_CLIENT_ID', MyServerClientId
         it.buildConfigField 'String', 'SERVER_BASE_URL', MyServerBaseUrl
     }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
@@ -38,6 +44,8 @@ dependencies {
     // Communication with server
     compile 'com.squareup.okhttp:okhttp:2.6.0'
     compile 'com.squareup.okio:okio:1.6.0'
+    // Local android database
+    compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
 }
 
 apply plugin: 'com.google.gms.google-services'

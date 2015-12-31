@@ -2,15 +2,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ludgo.android.mealnow">
 
+    <!-- Permissions required when using network -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name="com.activeandroid.app.Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- Related to the ActiveAndroid database -->
+        <meta-data
+            android:name="AA_DB_NAME"
+            android:value="meal_now.db" />
+        <meta-data
+            android:name="AA_DB_VERSION"
+            android:value="1" />
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="com.ludgo.android.mealnow.model.PublicOffer" />
+
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +38,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
+
+        <service android:name=".service.PublicOffersService" />
     </application>
 
 </manifest>
