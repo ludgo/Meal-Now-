@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.activeandroid.app.Application"
+        android:name="com.ludgo.android.mealnow.MealNowApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -40,6 +40,13 @@
         </activity>
 
         <service android:name=".service.PublicOffersService" />
+
+        <receiver android:name=".ui.MainActivity$PublicOffersReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="PUBLIC_OFFERS_ACTION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

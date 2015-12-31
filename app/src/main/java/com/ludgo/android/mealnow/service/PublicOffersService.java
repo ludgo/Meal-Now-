@@ -27,6 +27,7 @@ import java.net.URL;
 public class PublicOffersService extends IntentService {
 
     private final String LOG_TAG = PublicOffersService.class.getSimpleName();
+    public static final String PUBLIC_OFFERS_ACTION = "PUBLIC_OFFERS_ACTION";
 
     public PublicOffersService() {
         super("PublicOffersService");
@@ -103,6 +104,8 @@ public class PublicOffersService extends IntentService {
             final String NAME_USER_PICTURE = "picture";
 
             ActiveAndroid.beginTransaction();
+            // Count how many db rows are changed
+            int changeCount = 0;
             try {
                 for (int i = 0; i < offersArray.length(); i++) {
 
@@ -158,16 +161,28 @@ public class PublicOffersService extends IntentService {
                                 userPicture
                         );
                         publicOffer.save();
+                        changeCount++;
                     }
                 }
                 ActiveAndroid.setTransactionSuccessful();
             } finally {
                 ActiveAndroid.endTransaction();
+                if (changeCount > 0) {
+                    notifyDbChange();
+                }
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Error encoding server's response.");
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Called always after database update
+     */
+    void notifyDbChange() {
+        Intent intent = new Intent(PUBLIC_OFFERS_ACTION);
+        sendBroadcast(intent);
     }
 }
