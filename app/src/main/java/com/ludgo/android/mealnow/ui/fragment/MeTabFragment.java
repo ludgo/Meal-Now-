@@ -1,4 +1,4 @@
-package com.ludgo.android.mealnow.ui;
+package com.ludgo.android.mealnow.ui.fragment;
 
 
 import android.os.Bundle;
@@ -18,11 +18,6 @@ public class MeTabFragment extends Fragment {
     public MeTabFragment() {
         // Required empty public constructor
     }
-
-    public static MeTabFragment newInstance() {
-        return new MeTabFragment();
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

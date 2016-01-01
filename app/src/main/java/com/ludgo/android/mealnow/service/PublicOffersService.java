@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 import com.ludgo.android.mealnow.model.PublicOffer;
+import com.ludgo.android.mealnow.ui.fragment.PublicTabFragment;
 import com.ludgo.android.mealnow.util.Constants;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -22,11 +23,11 @@ import java.net.URL;
 
 /**
  * Fetch {@link PublicOffer}s from server
- * on demand from {@link com.ludgo.android.mealnow.ui.PublicTabFragment}
+ * on demand from {@link PublicTabFragment}
  */
 public class PublicOffersService extends IntentService {
 
-    private final String LOG_TAG = PublicOffersService.class.getSimpleName();
+    private static final String LOG_TAG = PublicOffersService.class.getSimpleName();
     public static final String PUBLIC_OFFERS_ACTION = "PUBLIC_OFFERS_ACTION";
 
     public PublicOffersService() {

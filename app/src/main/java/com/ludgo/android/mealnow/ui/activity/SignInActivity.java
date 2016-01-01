@@ -1,4 +1,4 @@
-package com.ludgo.android.mealnow.ui;
+package com.ludgo.android.mealnow.ui.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -23,7 +23,6 @@ import com.ludgo.android.mealnow.BuildConfig;
 import com.ludgo.android.mealnow.R;
 import com.ludgo.android.mealnow.util.Constants;
 import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -45,7 +44,7 @@ public class SignInActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
-    private static final String LOG_TAG = "SignInActivity";
+    private static final String LOG_TAG = SignInActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
@@ -276,10 +275,9 @@ public class SignInActivity extends AppCompatActivity implements
             object.put("user_picture", mUserPicture);
             object.put("token_id", acct.getIdToken()); // this token is Google id token
 
-            final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
             OkHttpClient client = new OkHttpClient();
 
-            RequestBody body = RequestBody.create(JSON, object.toString());
+            RequestBody body = RequestBody.create(Constants.OKHTTP_TYPE_JSON, object.toString());
             Request request = new Request.Builder()
                     .url(url)
                     .post(body)
@@ -329,10 +327,9 @@ public class SignInActivity extends AppCompatActivity implements
             object.put("user_id", mUserId);
             object.put("user_token", mServerToken); // this token is server token
 
-            final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
             OkHttpClient client = new OkHttpClient();
 
-            RequestBody body = RequestBody.create(JSON, object.toString());
+            RequestBody body = RequestBody.create(Constants.OKHTTP_TYPE_JSON, object.toString());
             Request request = new Request.Builder()
                     .url(url)
                     .post(body)

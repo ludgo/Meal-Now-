@@ -1,4 +1,4 @@
-package com.ludgo.android.mealnow.ui;
+package com.ludgo.android.mealnow.ui.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,6 +18,10 @@ import android.view.ViewGroup;
 import com.ludgo.android.mealnow.MealNowApplication;
 import com.ludgo.android.mealnow.R;
 import com.ludgo.android.mealnow.service.PublicOffersService;
+import com.ludgo.android.mealnow.ui.fragment.MeTabFragment;
+import com.ludgo.android.mealnow.ui.fragment.PromptLoginFragment;
+import com.ludgo.android.mealnow.ui.fragment.PublicTabFragment;
+import com.ludgo.android.mealnow.util.Utilities;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -83,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new PublicTabFragment();
                     break;
                 case 1:
-                    fragment = MeTabFragment.newInstance();
+                    if (Utilities.isUser()) {
+                        fragment = new MeTabFragment();
+                    } else {
+                        fragment = new PromptLoginFragment();
+                    }
                     break;
                 default:
                     fragment = new PublicTabFragment();

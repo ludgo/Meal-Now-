@@ -1,4 +1,4 @@
-package com.ludgo.android.mealnow.ui;
+package com.ludgo.android.mealnow.ui.fragment;
 
 
 import android.content.Intent;

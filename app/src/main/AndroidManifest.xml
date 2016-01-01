@@ -23,25 +23,32 @@
             android:value="1" />
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.ludgo.android.mealnow.model.PublicOffer" />
+            android:value="com.ludgo.android.mealnow.model.PublicOffer, com.ludgo.android.mealnow.model.MyInfo" />
 
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.SignInActivity"
-            android:parentActivityName=".ui.MainActivity">
+            android:name=".ui.activity.SignInActivity"
+            android:parentActivityName=".ui.activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainActivity" />
+                android:value=".ui.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.activity.LoginActivity"
+            android:parentActivityName=".ui.activity.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activity.MainActivity" />
         </activity>
 
         <service android:name=".service.PublicOffersService" />
 
-        <receiver android:name=".ui.MainActivity$PublicOffersReceiver"
+        <receiver android:name=".ui.activity.MainActivity$PublicOffersReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="PUBLIC_OFFERS_ACTION" />
