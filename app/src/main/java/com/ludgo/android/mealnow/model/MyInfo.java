@@ -17,32 +17,36 @@ public class MyInfo extends Model {
 
     // Temporary data describing currently signed user
     @Column(unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
-    public String my_id;
-    @Column(unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
-    public String my_token;
+    public int my_id;
+    @Column
+    public String my_token; // this is server token, not provider token
     @Column
     public String my_name;
     @Column
     public String my_email;
     @Column
     public String my_picture;
+    @Column
+    public String my_provider_id;
 
     public MyInfo() {
         // Required empty public constructor
     }
 
     public MyInfo(
-            String my_id,
+            int my_id,
             String my_token,
             String my_name,
             String my_email,
-            String my_picture) {
+            String my_picture,
+            String my_provider_id) {
 
         this.my_id = my_id;
         this.my_token = my_token;
         this.my_name = my_name;
         this.my_email = my_email;
         this.my_picture = my_picture;
+        this.my_provider_id = my_provider_id;
     }
 
     public static List<MyInfo> getAll() {

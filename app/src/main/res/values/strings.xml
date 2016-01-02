@@ -23,5 +23,6 @@
     <string name="login">Login</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
+    <string name="google_sign_in">Sign in with Google</string>
 
 </resources>

@@ -6,11 +6,18 @@ import com.squareup.okhttp.MediaType;
 
 public final class Constants {
 
+    // OkHttp library logs
     public static final String OKHTTP_TAG = "OkHttp";
     public static final String OKHTTP_REQUEST_TAG = "---> ";
     public static final String OKHTTP_RESPONSE_TAG = "<--- ";
     public static final String OKHTTP_HEADER_JSON = "application/json; charset=utf-8";
     public static final MediaType OKHTTP_TYPE_JSON = MediaType.parse(OKHTTP_HEADER_JSON);
+
+    // Specified by server api
+    public static final String USER_PICTURE_DEFAULT = "default";
+
+    public static final String AUTH_PROVIDER_MEALNOW = "mealnow";
+    public static final String AUTH_PROVIDER_GOOGLE = "google";
 
     public static final String API_URL_BASE = BuildConfig.SERVER_BASE_URL;
     public static final String API_V1_URL = API_URL_BASE + "/api/v1";
